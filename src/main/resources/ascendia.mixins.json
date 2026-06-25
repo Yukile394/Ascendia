@@ -1,0 +1,10 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "exloran.ascendia.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "InventoryScreenMixin",
+    "GenericContainerScreenMixin"
+  ]
+}

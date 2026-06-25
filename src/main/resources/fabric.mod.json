@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "ascendia",
+  "version": "${version}",
+  "name": "Ascendia",
+  "description": "Envanter, Ender Chest ve /pv (PlayerVaults) kasaları için hızlı işlem butonları ekleyen istemci taraflı yardımcı mod.",
+  "authors": [
+    "Yukile394"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "exloran.ascendia.AscendiaClient"
+    ]
+  },
+  "mixins": [
+    "ascendia.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.10",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
