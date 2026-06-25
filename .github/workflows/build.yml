@@ -48,6 +48,9 @@ jobs:
           sed -i "s/loader_version=.*/loader_version=${{ matrix.loader }}/" gradle.properties
           sed -i "s/fabric_version=.*/fabric_version=${{ matrix.fabric_api }}/" gradle.properties
 
+      - name: Grant execute permission
+        run: chmod +x gradlew
+
       - name: Build
         run: ./gradlew build
 
