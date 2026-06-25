@@ -11,7 +11,6 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -23,13 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(InventoryScreen.class)
 public abstract class InventoryScreenMixin extends HandledScreen<PlayerScreenHandler> {
 
-    @Shadow protected int x;
-    @Shadow protected int y;
-    @Shadow protected int backgroundWidth;
-    @Shadow protected int backgroundHeight;
-
-    // Mixin sınıfının derlenebilmesi için gereken "geçiş" constructor'ı.
-    // Çalışma zamanında gerçek InventoryScreen kendi constructor'ını kullanır, bu asla çağrılmaz.
     public InventoryScreenMixin(PlayerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
     }
@@ -42,8 +34,8 @@ public abstract class InventoryScreenMixin extends HandledScreen<PlayerScreenHan
         final int btnHeight = 16;
         final int spacing = 4;
         final int totalWidth = btnWidth * 3 + spacing * 2;
-        final int startX = this.x + this.backgroundWidth / 2 - totalWidth / 2;
-        final int rowY = this.y + this.backgroundHeight + 4;
+        final int startX = this.backgroundX + this.backgroundWidth / 2 - totalWidth / 2;
+        final int rowY = this.backgroundY + this.backgroundHeight + 4;
 
         AscendiaButton editBtn = AscendiaButton.create(
                 startX, rowY, btnWidth, btnHeight,
