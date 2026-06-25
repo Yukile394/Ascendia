@@ -34,8 +34,6 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         ContainerType type = ascendia$detectType(cfg);
         if (type == ContainerType.NONE) return;
 
-        // Sandık arka planının sağ üst köşesine hizala
-        // x, y: HandledScreen'in protected alanları — accessor ile alıyoruz
         HandledScreenAccessor acc = (HandledScreenAccessor) this;
         int bgX = acc.ascendia$getX();
         int bgY = acc.ascendia$getY();
@@ -45,7 +43,7 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         final int btnH   = 16;
         final int gap    = 4;
         final int startX = bgX + bgW + 4;
-        final int startY = bgY;  // Sandık arka planının tam üstünden başla
+        final int startY = bgY;
 
         String[] labels = {"Herşeyi At", "Oto Ekipman", "Herşeyi Koy", "Herşeyi Al", "Çöpleri At"};
         String[] ids    = {"ctr_dropall", "ctr_autoequip", "ctr_putall", "ctr_takeall", "ctr_trash"};
@@ -62,7 +60,6 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
             this.addDrawableChild(btn);
         }
 
-        // Düzenle butonu — 5 butonun hemen altında
         int editY = startY + labels.length * (btnH + gap) + 4;
         AscendiaButton editBtn = AscendiaButton.create(
                 startX, editY, btnW, btnH,
@@ -132,13 +129,15 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
     private ContainerType ascendia$detectType(AscendiaConfig cfg) {
         String title = this.getTitle().getString().toLowerCase().trim();
 
-        // Ender Chest — hem İngilizce hem Türkçe kontrol
+        // Ender Chest — hem İngilizce hem Türkçe tüm varyantlar
         if (title.equals("ender chest") || title.equals("ender kasası")
-                || title.contains("enderchest") || title.contains("ender chest")) {
+                || title.equals("ender sandığı") || title.equals("ender sandigi")
+                || title.contains("enderchest") || title.contains("ender chest")
+                || title.contains("ender sandı") || title.contains("ender kasa")) {
             return ContainerType.ENDER_CHEST;
         }
 
-        // PV / PlayerVault sandıkları
+        // PV / PlayerVault / Depo sandıkları
         for (String kw : cfg.pvTitleKeywords) {
             if (title.contains(kw.toLowerCase())) {
                 return ContainerType.PLAYER_VAULT;
