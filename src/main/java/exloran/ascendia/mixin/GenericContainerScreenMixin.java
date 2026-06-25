@@ -5,20 +5,25 @@ import exloran.ascendia.action.InventoryActions;
 import exloran.ascendia.config.AscendiaConfig;
 import exloran.ascendia.gui.AscendiaButton;
 import exloran.ascendia.gui.ContainerType;
-import exloran.ascendia.mixin.HandledScreenAccessor;
+import exloran.ascendia.gui.PresetMenuWidget;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GenericContainerScreen.class)
 public abstract class GenericContainerScreenMixin extends HandledScreen<GenericContainerScreenHandler> {
+
+    @Unique private final PresetMenuWidget ascendia$presetMenu = new PresetMenuWidget();
 
     public GenericContainerScreenMixin(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -28,63 +33,102 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
     private void ascendia$addButtons(CallbackInfo ci) {
         AscendiaConfig cfg = AscendiaClient.CONFIG;
         ContainerType type = ascendia$detectType(cfg);
-        if (type == ContainerType.NONE) {
-            return;
-        }
+        if (type == ContainerType.NONE) return;
 
         HandledScreenAccessor acc = (HandledScreenAccessor) this;
         int bgX = acc.ascendia$getX();
         int bgY = acc.ascendia$getY();
         int bgW = acc.ascendia$getBackgroundWidth();
 
-        final int btnWidth = 90;
-        final int btnHeight = 16;
-        final int spacing = 4;
+        final int btnW  = 90;
+        final int btnH  = 16;
+        final int gap   = 4;
         final int startX = bgX + bgW + 6;
         final int startY = bgY + 8;
 
-        String[] labels = {"Herşeyi At", "Herşeyi Al", "Herşeyi Koy", "Çöpleri At"};
-        String[] ids = {"ctr_dropall", "ctr_takeall", "ctr_putall", "ctr_droptrash"};
+        String[] labels = {"Herşeyi At", "Oto Ekipman", "Herşeyi Koy", "Herşeyi Al", "Çöpleri At"};
+        String[] ids    = {"ctr_dropall", "ctr_autoequip", "ctr_putall", "ctr_takeall", "ctr_trash"};
 
         for (int i = 0; i < labels.length; i++) {
-            final int index = i;
-            int by = startY + i * (btnHeight + spacing);
-
+            final int idx = i;
+            int by = startY + i * (btnH + gap);
             AscendiaButton btn = AscendiaButton.create(
-                    startX, by, btnWidth, btnHeight,
+                    startX, by, btnW, btnH,
                     Text.literal(labels[i]), ids[i], true,
-                    b -> ascendia$runAction(index)
+                    b -> ascendia$runAction(idx)
             );
             btn.applyStoredOffset(cfg);
             this.addDrawableChild(btn);
         }
+
+        int editY = startY + labels.length * (btnH + gap) + 4;
+        AscendiaButton editBtn = AscendiaButton.create(
+                startX, editY, btnW, btnH,
+                Text.literal("Düzenle"), "ctr_edit", false,
+                b -> InventoryActions.applyPreset(MinecraftClient.getInstance())
+        );
+        editBtn.applyStoredOffset(cfg);
+        this.addDrawableChild(editBtn);
     }
 
-    private void ascendia$runAction(int index) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        switch (index) {
-            case 0 -> InventoryActions.dropAllContainer(client);
-            case 1 -> InventoryActions.takeAllFromContainer(client);
-            case 2 -> InventoryActions.putAllToContainer(client);
-            case 3 -> InventoryActions.dropTrashFromContainer(client);
-            default -> {}
+    @Unique
+    private void ascendia$runAction(int idx) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        switch (idx) {
+            case 0 -> InventoryActions.dropAllContainer(mc);
+            case 1 -> InventoryActions.autoEquip(mc);
+            case 2 -> InventoryActions.putAllToContainer(mc);
+            case 3 -> InventoryActions.takeAllFromContainer(mc);
+            case 4 -> InventoryActions.dropTrashFromContainer(mc);
         }
     }
 
+    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    private void ascendia$onMouseClicked(double mx, double my, int button, CallbackInfoReturnable<Boolean> cir) {
+        if (ascendia$presetMenu.isVisible()) {
+            boolean consumed = ascendia$presetMenu.mouseClicked(mx, my, button);
+            if (consumed) { cir.setReturnValue(true); return; }
+        }
+
+        if (button == 1) {
+            HandledScreenAccessor acc = (HandledScreenAccessor) this;
+            int bgX = acc.ascendia$getX();
+            int bgW = acc.ascendia$getBackgroundWidth();
+            int bgY = acc.ascendia$getY();
+            final int btnH = 16, gap = 4;
+            int startX = bgX + bgW + 6;
+            int editY = bgY + 8 + 5 * (btnH + gap) + 4;
+
+            if (mx >= startX && mx <= startX + 90 && my >= editY && my <= editY + btnH) {
+                ascendia$presetMenu.show(startX - 168, editY - 30, (net.minecraft.client.gui.screen.Screen)(Object)this);
+                cir.setReturnValue(true);
+            }
+        }
+    }
+
+    @Inject(method = "render", at = @At("TAIL"))
+    private void ascendia$renderOverlay(DrawContext ctx, int mx, int my, float delta, CallbackInfo ci) {
+        ascendia$presetMenu.render(ctx, mx, my);
+    }
+
+    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    private void ascendia$keyPressed(int key, int scan, int mods, CallbackInfoReturnable<Boolean> cir) {
+        if (ascendia$presetMenu.keyPressed(key, scan, mods)) cir.setReturnValue(true);
+    }
+
+    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    private void ascendia$charTyped(char c, int mods, CallbackInfoReturnable<Boolean> cir) {
+        if (ascendia$presetMenu.charTyped(c, mods)) cir.setReturnValue(true);
+    }
+
+    @Unique
     private ContainerType ascendia$detectType(AscendiaConfig cfg) {
         String titleStr = this.getTitle().getString();
         String enderTitle = Text.translatable("container.enderchest").getString();
-
-        if (titleStr.equalsIgnoreCase(enderTitle)) {
-            return ContainerType.ENDER_CHEST;
+        if (titleStr.equalsIgnoreCase(enderTitle)) return ContainerType.ENDER_CHEST;
+        for (String kw : cfg.pvTitleKeywords) {
+            if (titleStr.toLowerCase().contains(kw.toLowerCase())) return ContainerType.PLAYER_VAULT;
         }
-
-        for (String keyword : cfg.pvTitleKeywords) {
-            if (titleStr.toLowerCase().contains(keyword.toLowerCase())) {
-                return ContainerType.PLAYER_VAULT;
-            }
-        }
-
         return ContainerType.NONE;
     }
 }
