@@ -37,7 +37,12 @@ public class AscendiaConfig {
 
     public boolean protectEnchantedItems = true;
 
-    public List<String> pvTitleKeywords = new ArrayList<>(List.of("Vault", "Kasa", "PV"));
+    public List<String> pvTitleKeywords = new ArrayList<>(List.of(
+            "Vault", "Kasa", "PV", "pv", "vault",
+            "Depo", "depo", "Sandık", "sandık",
+            "PlayerVault", "playervault",
+            "Chest", "chest"
+    ));
 
     public Map<String, int[]> buttonOffsets = new HashMap<>();
 
