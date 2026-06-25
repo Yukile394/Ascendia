@@ -12,15 +12,12 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(GenericContainerScreen.class)
 public abstract class GenericContainerScreenMixin extends HandledScreen<GenericContainerScreenHandler> {
-
-    @Shadow protected int backgroundWidth;
 
     public GenericContainerScreenMixin(GenericContainerScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
@@ -34,12 +31,16 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
             return;
         }
 
+        HandledScreenAccessor acc = (HandledScreenAccessor) this;
+        int bgX = acc.ascendia$getX();
+        int bgY = acc.ascendia$getY();
+        int bgW = acc.ascendia$getBackgroundWidth();
+
         final int btnWidth = 90;
         final int btnHeight = 16;
         final int spacing = 4;
-
-        final int startX = this.getX() + this.backgroundWidth + 6;
-        final int startY = this.getY() + 8;
+        final int startX = bgX + bgW + 6;
+        final int startY = bgY + 8;
 
         String[] labels = {"Herşeyi At", "Herşeyi Al", "Herşeyi Koy", "Çöpleri At"};
         String[] ids = {"ctr_dropall", "ctr_takeall", "ctr_putall", "ctr_droptrash"};
