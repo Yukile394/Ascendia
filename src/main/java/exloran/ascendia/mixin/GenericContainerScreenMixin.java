@@ -40,9 +40,9 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         int bgY = acc.ascendia$getY();
         int bgW = acc.ascendia$getBackgroundWidth();
 
-        final int btnW  = 90;
-        final int btnH  = 16;
-        final int gap   = 4;
+        final int btnW   = 90;
+        final int btnH   = 16;
+        final int gap    = 4;
         final int startX = bgX + bgW + 6;
         final int startY = bgY + 8;
 
@@ -83,11 +83,16 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         }
     }
 
-    @Inject(method = "mouseClicked(DDI)Z", at = @At("HEAD"), cancellable = true)
-    private void ascendia$onMouseClicked(double mx, double my, int button, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "render", at = @At("TAIL"))
+    private void ascendia$renderOverlay(DrawContext ctx, int mx, int my, float delta, CallbackInfo ci) {
+        ascendia$presetMenu.render(ctx, mx, my);
+    }
+
+    @Override
+    public boolean mouseClicked(double mx, double my, int button) {
         if (ascendia$presetMenu.isVisible()) {
             boolean consumed = ascendia$presetMenu.mouseClicked(mx, my, button);
-            if (consumed) { cir.setReturnValue(true); return; }
+            if (consumed) return true;
         }
 
         if (button == 1) {
@@ -100,25 +105,25 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
             int editY = bgY + 8 + 5 * (btnH + gap) + 4;
 
             if (mx >= startX && mx <= startX + 90 && my >= editY && my <= editY + btnH) {
-                ascendia$presetMenu.show(startX - 168, editY - 30, (net.minecraft.client.gui.screen.Screen)(Object)this);
-                cir.setReturnValue(true);
+                ascendia$presetMenu.show(startX - 168, editY - 30,
+                        (net.minecraft.client.gui.screen.Screen)(Object) this);
+                return true;
             }
         }
+
+        return super.mouseClicked(mx, my, button);
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void ascendia$renderOverlay(DrawContext ctx, int mx, int my, float delta, CallbackInfo ci) {
-        ascendia$presetMenu.render(ctx, mx, my);
+    @Override
+    public boolean keyPressed(int key, int scan, int mods) {
+        if (ascendia$presetMenu.keyPressed(key, scan, mods)) return true;
+        return super.keyPressed(key, scan, mods);
     }
 
-    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
-    private void ascendia$keyPressed(int key, int scan, int mods, CallbackInfoReturnable<Boolean> cir) {
-        if (ascendia$presetMenu.keyPressed(key, scan, mods)) cir.setReturnValue(true);
-    }
-
-    @Inject(method = "charTyped(CI)Z", at = @At("HEAD"), cancellable = true)
-    private void ascendia$charTyped(char c, int mods, CallbackInfoReturnable<Boolean> cir) {
-        if (ascendia$presetMenu.charTyped(c, mods)) cir.setReturnValue(true);
+    @Override
+    public boolean charTyped(char c, int mods) {
+        if (ascendia$presetMenu.charTyped(c, mods)) return true;
+        return super.charTyped(c, mods);
     }
 
     @Unique
