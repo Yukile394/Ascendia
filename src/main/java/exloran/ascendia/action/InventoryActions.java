@@ -3,6 +3,8 @@ package exloran.ascendia.action;
 import exloran.ascendia.AscendiaClient;
 import exloran.ascendia.config.AscendiaConfig;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -90,9 +92,7 @@ public class InventoryActions {
             ItemStack stack = slot.getStack();
             if (stack.isEmpty()) continue;
 
-            Identifier itemId = Registries.ITEM.getId(stack.getItem());
-            String idStr = itemId.toString();
-
+            String idStr = Registries.ITEM.getId(stack.getItem()).toString();
             boolean isChainmail = idStr.startsWith("minecraft:chainmail_");
             boolean isProt1Only = isProtection1Only(stack);
             boolean isTrash = cfg.trashItems.contains(idStr) || isChainmail || isProt1Only;
@@ -113,17 +113,16 @@ public class InventoryActions {
         boolean isArmor = path.endsWith("_helmet") || path.endsWith("_chestplate")
                        || path.endsWith("_leggings") || path.endsWith("_boots");
         if (!isArmor) return false;
-        var list = stack.getOrDefault(
-            net.minecraft.component.DataComponentTypes.ENCHANTMENTS,
-            net.minecraft.item.ItemEnchantmentsComponent.DEFAULT
+
+        ItemEnchantmentsComponent enchComp = stack.getOrDefault(
+            DataComponentTypes.ENCHANTMENTS,
+            ItemEnchantmentsComponent.DEFAULT
         );
-        if (list.getSize() != 1) return false;
-        for (var entry : list.getEnchantmentEntries()) {
-            String enchId = net.minecraft.registry.Registries.ENCHANTMENT
-                .getId(entry.getKey().value()) != null
-                ? net.minecraft.registry.Registries.ENCHANTMENT.getId(entry.getKey().value()).toString()
-                : "";
-            if (enchId.equals("minecraft:protection") && entry.getIntValue() == 1) return true;
+        if (enchComp.getSize() != 1) return false;
+
+        for (var entry : enchComp.getEnchantmentEntries()) {
+            String key = entry.getKey().getValue().toString();
+            if (key.equals("minecraft:protection") && entry.getIntValue() == 1) return true;
         }
         return false;
     }
