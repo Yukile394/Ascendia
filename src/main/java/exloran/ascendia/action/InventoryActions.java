@@ -12,7 +12,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -115,14 +114,15 @@ public class InventoryActions {
         if (!isArmor) return false;
 
         ItemEnchantmentsComponent enchComp = stack.getOrDefault(
-            DataComponentTypes.ENCHANTMENTS,
-            ItemEnchantmentsComponent.DEFAULT
+                DataComponentTypes.ENCHANTMENTS,
+                ItemEnchantmentsComponent.DEFAULT
         );
         if (enchComp.getSize() != 1) return false;
 
         for (var entry : enchComp.getEnchantmentEntries()) {
-            String key = entry.getKey().getValue().toString();
-            if (key.equals("minecraft:protection") && entry.getIntValue() == 1) return true;
+            // RegistryKey.toString() formatı: "minecraft:protection" içerir
+            String key = entry.getKey().toString();
+            if (key.contains("minecraft:protection") && entry.getIntValue() == 1) return true;
         }
         return false;
     }
@@ -243,4 +243,4 @@ public class InventoryActions {
         client.interactionManager.clickSlot(handler.syncId, bestSlotId, 0, SlotActionType.PICKUP, player);
         client.interactionManager.clickSlot(handler.syncId, armorSlotId, 0, SlotActionType.PICKUP, player);
     }
-}
+            }
