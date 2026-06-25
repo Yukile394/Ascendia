@@ -83,7 +83,7 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         }
     }
 
-    @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "mouseClicked(DDI)Z", at = @At("HEAD"), cancellable = true)
     private void ascendia$onMouseClicked(double mx, double my, int button, CallbackInfoReturnable<Boolean> cir) {
         if (ascendia$presetMenu.isVisible()) {
             boolean consumed = ascendia$presetMenu.mouseClicked(mx, my, button);
@@ -111,12 +111,12 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         ascendia$presetMenu.render(ctx, mx, my);
     }
 
-    @Inject(method = "keyPressed", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "keyPressed(III)Z", at = @At("HEAD"), cancellable = true)
     private void ascendia$keyPressed(int key, int scan, int mods, CallbackInfoReturnable<Boolean> cir) {
         if (ascendia$presetMenu.keyPressed(key, scan, mods)) cir.setReturnValue(true);
     }
 
-    @Inject(method = "charTyped", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "charTyped(CI)Z", at = @At("HEAD"), cancellable = true)
     private void ascendia$charTyped(char c, int mods, CallbackInfoReturnable<Boolean> cir) {
         if (ascendia$presetMenu.charTyped(c, mods)) cir.setReturnValue(true);
     }
