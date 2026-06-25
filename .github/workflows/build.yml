@@ -22,7 +22,7 @@ jobs:
             loader: "0.16.10"
             fabric_api: "0.106.1+1.21.2"
           - mc: "1.21.3"
-            yarn: "1.21.3+build.4"
+            yarn: "1.21.3+build.2"
             loader: "0.16.10"
             fabric_api: "0.107.0+1.21.3"
           - mc: "1.21.4"
