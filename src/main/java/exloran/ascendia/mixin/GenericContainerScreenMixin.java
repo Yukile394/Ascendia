@@ -5,6 +5,7 @@ import exloran.ascendia.action.InventoryActions;
 import exloran.ascendia.config.AscendiaConfig;
 import exloran.ascendia.gui.AscendiaButton;
 import exloran.ascendia.gui.ContainerType;
+import exloran.ascendia.mixin.HandledScreenAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
