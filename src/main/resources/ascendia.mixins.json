@@ -4,6 +4,7 @@
   "package": "exloran.ascendia.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "HandledScreenAccessor",
     "InventoryScreenMixin",
     "GenericContainerScreenMixin"
   ]
