@@ -127,23 +127,24 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
 
     @Unique
     private ContainerType ascendia$detectType(AscendiaConfig cfg) {
-        String title = this.getTitle().getString().toLowerCase().trim();
+        String title = this.getTitle().getString()
+                .replaceAll("§[0-9a-fk-or]", "")
+                .toLowerCase().trim();
 
-        // Ender Chest — hem İngilizce hem Türkçe tüm varyantlar
-        if (title.equals("ender chest") || title.equals("ender kasası")
-                || title.equals("ender sandığı") || title.equals("ender sandigi")
-                || title.contains("enderchest") || title.contains("ender chest")
-                || title.contains("ender sandı") || title.contains("ender kasa")) {
+        // Ender Chest
+        if (title.contains("ender chest") || title.contains("ender sandı")
+                || title.contains("ender kasa") || title.contains("enderchest")) {
             return ContainerType.ENDER_CHEST;
         }
 
-        // PV / PlayerVault / Depo sandıkları
+        // PV / Depo / Vault vb.
         for (String kw : cfg.pvTitleKeywords) {
             if (title.contains(kw.toLowerCase())) {
                 return ContainerType.PLAYER_VAULT;
             }
         }
 
-        return ContainerType.NONE;
+        // Her sandıkta göster
+        return ContainerType.PLAYER_VAULT;
     }
 }
