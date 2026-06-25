@@ -7,28 +7,18 @@ import net.fabricmc.loader.api.FabricLoader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-/**
- * Ascendia config dosyası.
- * config/ascendia.json içinde saklanır, oyun açıkken elle düzenlenip
- * F3+T (resource reload) ile değil ama oyunu yeniden başlatarak güncellenebilir.
- */
 public class AscendiaConfig {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Path PATH = FabricLoader.getInstance().getConfigDir().resolve("ascendia.json");
 
-    // ---- Renkler (0xAARRGGBB formatında ARGB) ----
-    public int buttonColor = 0xCC1B1B2A;
+    public int buttonColor      = 0xCC1B1B2A;
     public int buttonHoverColor = 0xE02A2A55;
-    public int buttonBorderColor = 0xFF00E5FF;
-    public int textColor = 0xFFE8FAFF;
+    public int buttonBorderColor= 0xFF00E5FF;
+    public int textColor        = 0xFFE8FAFF;
 
-    // ---- Çöp olarak kabul edilen item ID'leri (Çöpleri At butonu) ----
     public List<String> trashItems = new ArrayList<>(List.of(
             "minecraft:dirt",
             "minecraft:string",
@@ -38,28 +28,31 @@ public class AscendiaConfig {
             "minecraft:rotten_flesh",
             "minecraft:cobweb",
             "minecraft:poisonous_potato",
-            "minecraft:bone"
+            "minecraft:bone",
+            "minecraft:chainmail_helmet",
+            "minecraft:chainmail_chestplate",
+            "minecraft:chainmail_leggings",
+            "minecraft:chainmail_boots"
     ));
 
-    // true ise: büyülü (örn. Koruma 1+) hiçbir item asla çöp olarak atılmaz (güvenlik önlemi)
     public boolean protectEnchantedItems = true;
 
-    // /pv (PlayerVaults benzeri) kasaları tanımak için sandık başlığında aranacak kelimeler
     public List<String> pvTitleKeywords = new ArrayList<>(List.of("Vault", "Kasa", "PV"));
 
-    // Düzenle modunda sürüklenen butonların varsayılan konuma göre farkı (id -> [dx, dy])
     public Map<String, int[]> buttonOffsets = new HashMap<>();
+
+    public String presetName = null;
+    public Map<Integer, String> presetSlots = new LinkedHashMap<>();
 
     public static AscendiaConfig load() {
         if (Files.exists(PATH)) {
-            try (var reader = Files.newBufferedReader(PATH)) {
-                AscendiaConfig cfg = GSON.fromJson(reader, AscendiaConfig.class);
+            try (var r = Files.newBufferedReader(PATH)) {
+                AscendiaConfig cfg = GSON.fromJson(r, AscendiaConfig.class);
                 if (cfg != null) {
+                    if (cfg.presetSlots == null) cfg.presetSlots = new LinkedHashMap<>();
                     return cfg;
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            } catch (IOException e) { e.printStackTrace(); }
         }
         AscendiaConfig fresh = new AscendiaConfig();
         fresh.save();
@@ -69,12 +62,10 @@ public class AscendiaConfig {
     public void save() {
         try {
             Files.createDirectories(PATH.getParent());
-            try (var writer = Files.newBufferedWriter(PATH)) {
-                GSON.toJson(this, writer);
+            try (var w = Files.newBufferedWriter(PATH)) {
+                GSON.toJson(this, w);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException e) { e.printStackTrace(); }
     }
 
     public int[] getOffset(String id) {
